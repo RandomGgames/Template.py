@@ -77,9 +77,9 @@ def setup_logging(
 
 if __name__ == "__main__":
     pc_name = socket.gethostname()
-    script_name = pathlib.Path(os.path.basename(__file__)).stem
-    log_dir = pathlib.Path(f"{script_name} Logs")
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    script_name = pathlib.Path(os.path.basename(__file__)).stem
+    log_dir = pathlib.Path(f'{script_name} Logs')
     log_file_name = pathlib.Path(f'{timestamp}_{pc_name}.log')
     log_file_path = os.path.join(log_dir, log_file_name)
     setup_logging(logger, log_file_path, number_of_logs_to_keep=10)

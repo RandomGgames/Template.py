@@ -23,8 +23,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 """
-Template.py
-
 Description/explination here
 """
 
@@ -74,9 +72,9 @@ def setup_logging(
     logger.addHandler(console_handler)
     
     # Set specific logging levels
-    #logging.getLogger('requests').setLevel(logging.INFO)
-    #logging.getLogger('sys').setLevel(logging.CRITICAL)
-    #logging.getLogger('urllib3').setLevel(logging.INFO)
+    # logging.getLogger('requests').setLevel(logging.INFO)
+    # logging.getLogger('sys').setLevel(logging.CRITICAL)
+    # logging.getLogger('urllib3').setLevel(logging.INFO)
 
 if __name__ == "__main__":
     pc_name = socket.gethostname()

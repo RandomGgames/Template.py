@@ -17,6 +17,7 @@ def main(dut_sn):
     start_time = time.perf_counter()
     
     logger.debug(f'Testing DUT SN "{dut_sn}"')
+    
     logger.debug(f'Debug message in main')
     logger.info(f'Info message in main')
     logger.warning(f'Warning message in main')

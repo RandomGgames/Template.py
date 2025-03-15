@@ -1,15 +1,3 @@
-# from send2trash import send2trash
-# from urllib.parse import urlparse
-# import json
-# import keyboard
-# import math
-# import pyautogui
-# import requests
-# import webbrowser
-# import win32cred
-# import xmltodict
-# import yaml
-# import zipfile
 import datetime
 import os
 import pathlib
@@ -72,8 +60,6 @@ def setup_logging(
     
     # Set specific logging levels
     # logging.getLogger('requests').setLevel(logging.INFO)
-    # logging.getLogger('sys').setLevel(logging.CRITICAL)
-    # logging.getLogger('urllib3').setLevel(logging.INFO)
 
 if __name__ == "__main__":
     pc_name = socket.gethostname()

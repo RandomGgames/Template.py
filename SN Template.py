@@ -18,9 +18,9 @@ def main(dut_sn):
     
     logger.debug(f'Testing DUT SN "{dut_sn}"')
     
-    logger.debug(f'Debug message in main')
-    logger.info(f'Info message in main')
-    logger.warning(f'Warning message in main')
+    logger.debug('Debug message in main')
+    logger.info('Info message in main')
+    logger.warning('Warning message in main')
     
     end_time = time.perf_counter()
     duration = end_time - start_time

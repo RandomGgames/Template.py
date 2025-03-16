@@ -16,9 +16,9 @@ Description/explination here
 def main():
     start_time = time.perf_counter()
     
-    logger.debug(f'Debug message in main')
-    logger.info(f'Info message in main')
-    logger.warning(f'Warning message in main')
+    logger.debug('Debug message in main')
+    logger.info('Info message in main')
+    logger.warning('Warning message in main')
     
     end_time = time.perf_counter()
     duration = end_time - start_time

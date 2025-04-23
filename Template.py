@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 import pathlib
 import socket
@@ -63,7 +63,7 @@ def setup_logging(
 
 if __name__ == "__main__":
     pc_name = socket.gethostname()
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     script_name = pathlib.Path(os.path.basename(__file__)).stem
     log_dir = pathlib.Path(f'{script_name} Logs')
     log_file_name = pathlib.Path(f'{timestamp}_{pc_name}.log')

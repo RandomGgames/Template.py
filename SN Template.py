@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 import pathlib
 import socket
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     if dut_sn == '':
         dut_sn = None
     pc_name = socket.gethostname()
-    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     script_name = pathlib.Path(os.path.basename(__file__)).stem
     log_dir = pathlib.Path(f'{script_name} Logs/{dut_sn}')
     log_file_name = pathlib.Path(f'{timestamp}_{str(dut_sn)}_{pc_name}.log')

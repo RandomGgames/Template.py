@@ -1,10 +1,11 @@
-from datetime import datetime
 import os
 import pathlib
 import socket
 import sys
 import time
 import typing
+
+from datetime import datetime
 
 import logging
 logger = logging.getLogger(__name__)

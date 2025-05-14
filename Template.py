@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 """
-Description/explination here
+Description/explanation here
 """
 
 

@@ -15,7 +15,7 @@ Description/explanation here
 """
 
 
-def main(dut_sn):
+def main(dut_sn: str | None):
     start_time = time.perf_counter()
 
     logger.debug(f'Testing DUT SN "{dut_sn}"')
@@ -31,12 +31,12 @@ def main(dut_sn):
 
 def setup_logging(
         logger: logging.Logger,
-        log_file_path: typing.Union[str, os.fspath],
+        log_file_path: typing.Union[str, os.PathLike[str]],
         number_of_logs_to_keep: typing.Union[int, None] = None,
-        console_logging_level=logging.DEBUG,
-        file_logging_level=logging.DEBUG,
-        log_message_format='%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s] [%(name)s]: %(message)s',
-        date_format='%Y-%m-%d %H:%M:%S'):
+        console_logging_level: int = logging.DEBUG,
+        file_logging_level: int = logging.DEBUG,
+        log_message_format: str = '%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s] [%(name)s]: %(message)s',
+        date_format: str = '%Y-%m-%d %H:%M:%S'):
     # Initialize logs folder
     log_dir = os.path.dirname(log_file_path)
     if not os.path.exists(log_dir):

@@ -17,16 +17,14 @@ Python Script Template
 
 def main(dut_sn: str | None) -> None:
     start_time = time.perf_counter()
-
+    logger.info('Starting operation...')
     logger.debug(f'Testing DUT SN "{dut_sn}"')
 
-    logger.debug('Debug message in main')
-    logger.info('Info message in main')
-    logger.warning('Warning message in main')
+    pass
 
     end_time = time.perf_counter()
     duration = end_time - start_time
-    logger.debug(f'Completed operation in {duration:.4f}s.')
+    logger.info(f'Completed operation in {duration:.4f}s.')
 
 
 def setup_logging(
@@ -87,4 +85,3 @@ if __name__ == "__main__":
         error = 1
     finally:
         sys.exit(error)
-

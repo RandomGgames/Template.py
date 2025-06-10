@@ -17,14 +17,13 @@ Python Script Template
 
 def main() -> None:
     start_time = time.perf_counter()
+    logger.info('Starting operation...')
 
-    logger.debug('Debug message in main')
-    logger.info('Info message in main')
-    logger.warning('Warning message in main')
+    pass
 
     end_time = time.perf_counter()
     duration = end_time - start_time
-    logger.debug(f'Completed operation in {duration:.4f}s.')
+    logger.info(f'Completed operation in {duration:.4f}s.')
 
 
 def setup_logging(

@@ -1,5 +1,4 @@
 import pathlib
-import socket
 import sys
 import time
 import traceback

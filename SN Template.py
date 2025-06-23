@@ -75,7 +75,7 @@ if __name__ == "__main__":
     log_dir = pathlib.Path(f"{script_name} Logs/{dut_sn}")
     log_file_name = f"{timestamp}_{str(dut_sn)}_{pc_name}.log"
     log_file_path = log_dir / log_file_name
-    setup_logging(logger, log_file_path, number_of_logs_to_keep=10)
+    setup_logging(logger, log_file_path, number_of_logs_to_keep=10, log_message_format="%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s")
 
     error = 0
     try:

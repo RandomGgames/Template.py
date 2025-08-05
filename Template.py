@@ -16,14 +16,7 @@ Python Script Template
 
 
 def main() -> None:
-    start_time = time.perf_counter()
-    logger.info("Starting operation...")
-
     pass
-
-    end_time = time.perf_counter()
-    duration = end_time - start_time
-    logger.info(f"Completed operation in {duration:.4f}s.")
 
 
 def setup_logging(
@@ -75,7 +68,12 @@ if __name__ == "__main__":
 
     error = 0
     try:
+        start_time = time.perf_counter()
+        logger.info("Starting operation...")
         main()
+        end_time = time.perf_counter()
+        duration = end_time - start_time
+        logger.info(f"Completed operation in {duration:.4f}s.")
     except Exception as e:
         logger.warning(f"A fatal error has occurred: {repr(e)}\n{traceback.format_exc()}")
         error = 1

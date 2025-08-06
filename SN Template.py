@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import socket
 import sys
@@ -7,7 +8,6 @@ import typing
 
 from datetime import datetime
 
-import logging
 logger = logging.getLogger(__name__)
 
 """

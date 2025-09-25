@@ -4,7 +4,6 @@ import sys
 import time
 import traceback
 import typing
-
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

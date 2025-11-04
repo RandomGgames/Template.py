@@ -5,7 +5,7 @@ import sys
 import time
 import traceback
 from datetime import datetime
-from utils import setup_logging, format_duration_long
+from utils import setup_logging, format_duration_long, read_toml
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,12 @@ Template includes:
 - Error handling and cleanup
 - DUT serial number support with SN-specific log folders
 """
-__version__ = "1.0.0"
-__date__ = "2023-01-01"
+
+__version__ = "1.0.0"  # Major.Minor.Patch
+__date__ = "2000-01-01"  # yyyy-mm-dd
+
+config_path = pathlib.Path("config.toml")
+config = read_toml(config_path)
 
 
 def main(dut_sn: str | None) -> None:
@@ -57,11 +61,12 @@ if __name__ == "__main__":
 
     error = 0
     try:
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
         logger.info(f"Script: {script_name} | Version: {__version__} | DUT SN: {dut_sn} | Date: {datetime.now().strftime('%Y-%m-%d')}")
         main(dut_sn)
-        end_time = time.perf_counter()
-        duration = format_duration_long(end_time - start_time)
+        end_time = time.perf_counter_ns()
+        duration = end_time - start_time
+        duration = format_duration_long(duration / 1e9)
         logger.info(f"Execution completed in {duration}.")
     except KeyboardInterrupt:
         logger.warning("Operation interrupted by user.")

@@ -1,6 +1,6 @@
 [logging]
 console_logging_level = "DEBUG"
 file_logging_level = "DEBUG"
-use_logs_folder = false
+use_logs_folder = true
 number_of_logs_to_keep = 10
 log_message_format = "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"

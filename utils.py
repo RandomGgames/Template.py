@@ -10,6 +10,8 @@ def read_toml(file_path: typing.Union[str, pathlib.Path]) -> dict:
     Read configuration settings from the TOML file.
     """
     file_path = pathlib.Path(file_path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
     config = toml.load(file_path)
     return config
 
@@ -17,26 +19,31 @@ def read_toml(file_path: typing.Union[str, pathlib.Path]) -> dict:
 def format_duration_long(duration_seconds: float) -> str:
     """
     Convert a duration in seconds to a human-readable string with
-    years, months, days, hours, minutes, seconds, and milliseconds.
-    Example: 1y2mo3d4h5m6s321ms
+    years, months, days, hours, minutes, seconds, milliseconds,
+    microseconds, and nanoseconds.
+    Example: 1y2mo3d4h5m6s321ms123us456ns
     """
-    # Convert everything to milliseconds for easier integer math
-    total_ms = int(duration_seconds * 1000)
+    # Convert everything to nanoseconds for precision
+    total_ns = int(duration_seconds * 1_000_000_000)
 
     # Define conversions
-    ms_per_second = 1000
-    ms_per_minute = 60 * ms_per_second
-    ms_per_hour = 60 * ms_per_minute
-    ms_per_day = 24 * ms_per_hour
-    ms_per_month = 30 * ms_per_day   # approximate month as 30 days
-    ms_per_year = 365 * ms_per_day   # approximate year as 365 days
+    ns_per_microsecond = 1_000
+    ns_per_millisecond = 1_000_000
+    ns_per_second = 1_000_000_000
+    ns_per_minute = 60 * ns_per_second
+    ns_per_hour = 60 * ns_per_minute
+    ns_per_day = 24 * ns_per_hour
+    ns_per_month = 30 * ns_per_day   # approximate month as 30 days
+    ns_per_year = 365 * ns_per_day   # approximate year as 365 days
 
-    years, rem_ms = divmod(total_ms, ms_per_year)
-    months, rem_ms = divmod(rem_ms, ms_per_month)
-    days, rem_ms = divmod(rem_ms, ms_per_day)
-    hours, rem_ms = divmod(rem_ms, ms_per_hour)
-    minutes, rem_ms = divmod(rem_ms, ms_per_minute)
-    seconds, milliseconds = divmod(rem_ms, ms_per_second)
+    years, rem_ns = divmod(total_ns, ns_per_year)
+    months, rem_ns = divmod(rem_ns, ns_per_month)
+    days, rem_ns = divmod(rem_ns, ns_per_day)
+    hours, rem_ns = divmod(rem_ns, ns_per_hour)
+    minutes, rem_ns = divmod(rem_ns, ns_per_minute)
+    seconds, rem_ns = divmod(rem_ns, ns_per_second)
+    milliseconds, rem_ns = divmod(rem_ns, ns_per_millisecond)
+    microseconds, nanoseconds = divmod(rem_ns, ns_per_microsecond)
 
     parts = []
     if years:
@@ -51,8 +58,12 @@ def format_duration_long(duration_seconds: float) -> str:
         parts.append(f"{minutes}m")
     if seconds:
         parts.append(f"{seconds}s")
-    if milliseconds or not parts:
-        parts.append(f"{milliseconds}ms")  # always show ms if nothing else
+    if milliseconds:
+        parts.append(f"{milliseconds}ms")
+    if microseconds:
+        parts.append(f"{microseconds}us")
+    if nanoseconds or not parts:
+        parts.append(f"{nanoseconds}ns")  # always show ns if nothing else
 
     return "".join(parts)
 

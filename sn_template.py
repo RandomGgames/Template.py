@@ -18,6 +18,8 @@ Template includes:
 - Error handling and cleanup
 - DUT serial number support with SN-specific log folders
 """
+__version__ = "1.0.0"
+__date__ = "2023-01-01"
 
 
 def main(dut_sn: str | None) -> None:
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     error = 0
     try:
         start_time = time.perf_counter()
-        logger.info(f"Script: {script_name} | DUT SN: {dut_sn} | Date: {datetime.now().strftime('%Y-%m-%d')}")
+        logger.info(f"Script: {script_name} | Version: {__version__} | DUT SN: {dut_sn} | Date: {datetime.now().strftime('%Y-%m-%d')}")
         main(dut_sn)
         end_time = time.perf_counter()
         duration = format_duration_long(end_time - start_time)

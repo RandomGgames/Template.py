@@ -16,13 +16,16 @@ Template includes:
 - Execution timing with human-readable duration
 - Error handling and cleanup
 """
-__version__ = "1.0.0"
-__date__ = "2023-01-01"
+
+__version__ = "1.0.0" # Major.Minor.Patch
+__date__ = "2000-01-01" # yyyy-mm-dd
+
+config_path = pathlib.Path("config.toml")
+config = read_toml(config_path)
 
 
 def main() -> None:
-    pass  # Code goes here
-    time.sleep(10)
+    pass
 
 
 if __name__ == "__main__":
@@ -63,12 +66,12 @@ if __name__ == "__main__":
 
     error = 0
     try:
-        start_time = time.perf_counter()
+        start_time = time.perf_counter_ns()
         logger.info(f"Script: {script_name} | Version: {__version__} | Date: {__date__}")
         main()
-        end_time = time.perf_counter()
+        end_time = time.perf_counter_ns()
         duration = end_time - start_time
-        duration = format_duration_long(duration)
+        duration = format_duration_long(duration / 1e9)
         logger.info(f"Execution completed in {duration}.")
     except KeyboardInterrupt:
         logger.warning("Operation interrupted by user.")

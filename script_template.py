@@ -4,6 +4,7 @@ import socket
 import sys
 import time
 import traceback
+from datetime import datetime
 from utils import setup_logging, format_duration_long, read_toml
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,6 @@ Template includes:
 """
 
 __version__ = "1.0.0" # Major.Minor.Patch
-__date__ = "2000-01-01" # yyyy-mm-dd
 
 config_path = pathlib.Path("config.toml")
 config = read_toml(config_path)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     script_name = pathlib.Path(__file__).stem
     if use_logs_folder:
         pc_name = socket.gethostname()
-        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         log_dir = pathlib.Path(f"{script_name} Logs")
         log_dir.mkdir(exist_ok=True)
         log_file_name = f"{timestamp}_{pc_name}.log"
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     error = 0
     try:
         start_time = time.perf_counter_ns()
-        logger.info(f"Script: {script_name} | Version: {__version__} | Date: {__date__}")
+        logger.info(f"Script: {script_name} | Version: {__version__}")
         main()
         end_time = time.perf_counter_ns()
         duration = end_time - start_time

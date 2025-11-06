@@ -13,22 +13,20 @@ logger = logging.getLogger(__name__)
 SN-Specific Python Script Template
 
 Template includes:
-- Configurable logging via utils
-- Execution timing with human-readable duration
+- Configurable logging via config file
+- Script run time at the end of execution
 - Error handling and cleanup
 - DUT serial number support with SN-specific log folders
 """
 
 __version__ = "1.0.0"  # Major.Minor.Patch
-__date__ = "2000-01-01"  # yyyy-mm-dd
 
 config_path = pathlib.Path("config.toml")
 config = read_toml(config_path)
 
 
 def main(dut_sn: str | None) -> None:
-    logger.debug(f"Testing DUT SN '{dut_sn}'")
-    pass  # Code goes here
+    pass
 
 
 if __name__ == "__main__":
@@ -36,33 +34,41 @@ if __name__ == "__main__":
     if dut_sn == "":
         dut_sn = None
 
+    config = read_toml(config_path)
+
+    console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.INFO)
+    file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.INFO)
+    use_logs_folder = config.get("logging", {}).get("use_logs_folder", True)
+    number_of_logs_to_keep = config.get("logging", {}).get("number_of_logs_to_keep", 10)
+    log_message_format = config.get("logging", {}).get(
+        "log_message_format",
+        "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"
+    )
+
     script_name = pathlib.Path(__file__).stem
     pc_name = socket.gethostname()
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if use_logs_folder:
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        log_dir = pathlib.Path(f"logs/{script_name}/{dut_sn}")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file_name = f"{timestamp}_{dut_sn}_{script_name}_{pc_name}.log"
+        log_file_path = log_dir / log_file_name
+    else:
+        log_file_path = pathlib.Path(f"{dut_sn}_{script_name}_{pc_name}.log")
 
-    # Create SN-specific log directory
-    log_dir = pathlib.Path(f"{script_name} Logs")
-    if dut_sn:
-        log_dir /= str(dut_sn)
-    log_dir.mkdir(parents=True, exist_ok=True)
-
-    log_file_name = f"{timestamp}_{str(dut_sn)}_{pc_name}.log"
-    log_file_path = log_dir / log_file_name
-
-    # Set up logging
     setup_logging(
         logger,
         log_file_path,
-        console_logging_level=logging.DEBUG,
-        file_logging_level=logging.DEBUG,
-        number_of_logs_to_keep=10,
-        log_message_format="%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"
+        console_logging_level=console_logging_level,
+        file_logging_level=file_logging_level,
+        number_of_logs_to_keep=number_of_logs_to_keep,
+        log_message_format=log_message_format
     )
 
     error = 0
     try:
         start_time = time.perf_counter_ns()
-        logger.info(f"Script: {script_name} | Version: {__version__} | DUT SN: {dut_sn} | Date: {datetime.now().strftime('%Y-%m-%d')}")
+        logger.info(f"Script: {script_name} | Version: {__version__} | DUT SN: {dut_sn} | Host: {pc_name}")
         main(dut_sn)
         end_time = time.perf_counter_ns()
         duration = end_time - start_time
@@ -75,7 +81,6 @@ if __name__ == "__main__":
         logger.warning(f"A fatal error has occurred: {repr(e)}\n{traceback.format_exc()}")
         error = 1
     finally:
-        # Clean up logging handlers
         for handler in logger.handlers:
             handler.close()
         logger.handlers.clear()

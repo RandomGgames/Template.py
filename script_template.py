@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 Python Script Template
 
 Template includes:
-- Configurable logging via TOML
-- Execution timing with human-readable duration
+- Configurable logging via config file
+- Script run time at the end of execution
 - Error handling and cleanup
 """
 
-__version__ = "1.0.0" # Major.Minor.Patch
+__version__ = "1.0.0"  # Major.Minor.Patch
 
 config_path = pathlib.Path("config.toml")
 config = read_toml(config_path)
@@ -45,15 +45,15 @@ if __name__ == "__main__":
     )
 
     script_name = pathlib.Path(__file__).stem
+    pc_name = socket.gethostname()
     if use_logs_folder:
-        pc_name = socket.gethostname()
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_dir = pathlib.Path(f"{script_name} Logs")
-        log_dir.mkdir(exist_ok=True)
-        log_file_name = f"{timestamp}_{pc_name}.log"
+        log_dir = pathlib.Path(f"logs/{script_name}")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file_name = f"{timestamp}_{script_name}_{pc_name}.log"
         log_file_path = log_dir / log_file_name
     else:
-        log_file_path = pathlib.Path(f"{script_name}.log")
+        log_file_path = pathlib.Path(f"{script_name}_{pc_name}.log")
 
     setup_logging(
         logger,
@@ -67,7 +67,8 @@ if __name__ == "__main__":
     error = 0
     try:
         start_time = time.perf_counter_ns()
-        logger.info(f"Script: {script_name} | Version: {__version__}")
+        logger.info(f"Script: {script_name} | Version: {__version__} | Host: {pc_name}")
+
         main()
         end_time = time.perf_counter_ns()
         duration = end_time - start_time

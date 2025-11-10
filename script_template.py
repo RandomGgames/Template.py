@@ -3,9 +3,10 @@ import pathlib
 import socket
 import sys
 import time
+import toml
 import traceback
+import typing
 from datetime import datetime
-from utils import setup_logging, format_duration_long, read_toml
 
 logger = logging.getLogger(__name__)
 
@@ -20,19 +21,96 @@ Template includes:
 
 __version__ = "1.0.0"  # Major.Minor.Patch
 
-config_path = pathlib.Path("config.toml")
-config = read_toml(config_path)
+
+def read_toml(file_path: typing.Union[str, pathlib.Path]) -> dict:
+    """
+    Read configuration settings from the TOML file.
+    """
+    file_path = pathlib.Path(file_path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    config = toml.load(file_path)
+    return config
 
 
 def main() -> None:
     pass
 
 
+def format_duration_long(duration_seconds: float) -> str:
+    """
+    Format duration in a human-friendly way, showing only the two largest non-zero units.
+    For durations >= 1s, do not show microseconds or nanoseconds.
+    For durations >= 1m, do not show milliseconds.
+    """
+    ns = int(duration_seconds * 1_000_000_000)
+    units = [
+        ('y', 365 * 24 * 60 * 60 * 1_000_000_000),
+        ('mo', 30 * 24 * 60 * 60 * 1_000_000_000),
+        ('d', 24 * 60 * 60 * 1_000_000_000),
+        ('h', 60 * 60 * 1_000_000_000),
+        ('m', 60 * 1_000_000_000),
+        ('s', 1_000_000_000),
+        ('ms', 1_000_000),
+        ('us', 1_000),
+        ('ns', 1),
+    ]
+    parts = []
+    for name, factor in units:
+        value, ns = divmod(ns, factor)
+        if value:
+            parts.append(f"{value}{name}")
+        # Stop after two largest non-zero units
+        if len(parts) == 2:
+            break
+    if not parts:
+        return "0s"
+    return "".join(parts)
+
+
+def setup_logging(
+        logger: logging.Logger,
+        log_file_path: typing.Union[str, pathlib.Path],
+        number_of_logs_to_keep: typing.Union[int, None] = None,
+        console_logging_level: int = logging.DEBUG,
+        file_logging_level: int = logging.DEBUG,
+        log_message_format: str = "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s] [%(name)s]: %(message)s",
+        date_format: str = "%Y-%m-%d %H:%M:%S") -> None:
+    log_file_path = pathlib.Path(log_file_path)
+    log_dir = log_file_path.parent
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    # Limit # of logs in logs folder
+    if number_of_logs_to_keep is not None:
+        log_files = sorted([f for f in log_dir.glob("*.log")], key=lambda f: f.stat().st_mtime)
+        if len(log_files) > number_of_logs_to_keep:
+            for file in log_files[:-number_of_logs_to_keep]:
+                file.unlink()
+
+    # Clear old handlers to avoid duplication
+    logger.handlers.clear()
+    logger.setLevel(file_logging_level)
+
+    formatter = logging.Formatter(log_message_format, datefmt=date_format)
+
+    # File Handler
+    file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
+    file_handler.setLevel(file_logging_level)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # Console Handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(console_logging_level)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+
 if __name__ == "__main__":
     config_path = pathlib.Path("config.toml")
     if not config_path.exists():
         raise FileNotFoundError(f"Missing {config_path}")
-
+    global config
     config = read_toml(config_path)
 
     console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.INFO)

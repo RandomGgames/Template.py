@@ -1,3 +1,5 @@
+example_key = "example_value"
+
 [logging]
 console_logging_level = "DEBUG"
 file_logging_level = "DEBUG"

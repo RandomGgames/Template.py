@@ -34,6 +34,7 @@ def read_toml(file_path: typing.Union[str, pathlib.Path]) -> dict:
 
 
 def main() -> None:
+    # example_key = config.get("example_key", None)
     pass
 
 

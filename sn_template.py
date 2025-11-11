@@ -119,8 +119,9 @@ if __name__ == "__main__":
     global config
     config = read_toml(config_path)
 
-    console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.INFO)
-    file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.INFO)
+    console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.DEBUG)
+    file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.DEBUG)
+    logs_file_path = config.get("logging", {}).get("logs_file_path", "logs")
     use_logs_folder = config.get("logging", {}).get("use_logs_folder", True)
     number_of_logs_to_keep = config.get("logging", {}).get("number_of_logs_to_keep", 10)
     log_message_format = config.get("logging", {}).get(
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     pc_name = socket.gethostname()
     if use_logs_folder:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_dir = pathlib.Path(f"logs/{script_name}/{dut_sn}")
+        log_dir = pathlib.Path(f"{logs_file_path}/{script_name}/{dut_sn}")
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file_name = f"{timestamp}_{dut_sn}_{script_name}_{pc_name}.log"
         log_file_path = log_dir / log_file_name

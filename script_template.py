@@ -28,7 +28,7 @@ def read_toml(file_path: typing.Union[str, pathlib.Path]) -> dict:
     """
     file_path = pathlib.Path(file_path)
     if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
+        raise FileNotFoundError(f'File not found: "{file_path}"')
     config = toml.load(file_path)
     return config
 
@@ -60,7 +60,7 @@ def format_duration_long(duration_seconds: float) -> str:
     for name, factor in units:
         value, ns = divmod(ns, factor)
         if value:
-            parts.append(f"{value}{name}")
+            parts.append(f'{value}{name}')
         # Stop after two largest non-zero units
         if len(parts) == 2:
             break
@@ -110,7 +110,7 @@ def setup_logging(
 if __name__ == "__main__":
     config_path = pathlib.Path("config.toml")
     if not config_path.exists():
-        raise FileNotFoundError(f"Missing {config_path}")
+        raise FileNotFoundError(f'Missing {config_path}')
     global config
     config = read_toml(config_path)
 
@@ -128,12 +128,12 @@ if __name__ == "__main__":
     pc_name = socket.gethostname()
     if use_logs_folder:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_dir = pathlib.Path(f"{logs_file_path}/{script_name}")
+        log_dir = pathlib.Path(f'{logs_file_path}/{script_name}')
         log_dir.mkdir(parents=True, exist_ok=True)
-        log_file_name = f"{timestamp}_{script_name}_{pc_name}.log"
+        log_file_name = f'{timestamp}_{script_name}_{pc_name}.log'
         log_file_path = log_dir / log_file_name
     else:
-        log_file_path = pathlib.Path(f"{script_name}_{pc_name}.log")
+        log_file_path = pathlib.Path(f'{script_name}_{pc_name}.log')
 
     setup_logging(
         logger,
@@ -147,18 +147,18 @@ if __name__ == "__main__":
     error = 0
     try:
         start_time = time.perf_counter_ns()
-        logger.info(f"Script: {script_name} | Version: {__version__} | Host: {pc_name}")
+        logger.info(f'Script: {script_name} | Version: {__version__} | Host: {pc_name}')
 
         main()
         end_time = time.perf_counter_ns()
         duration = end_time - start_time
         duration = format_duration_long(duration / 1e9)
-        logger.info(f"Execution completed in {duration}.")
+        logger.info(f'Execution completed in {duration}.')
     except KeyboardInterrupt:
         logger.warning("Operation interrupted by user.")
         error = 130
     except Exception as e:
-        logger.warning(f"A fatal error has occurred: {repr(e)}\n{traceback.format_exc()}")
+        logger.warning(f'A fatal error has occurred: {repr(e)}\n{traceback.format_exc()}')
         error = 1
     finally:
         for handler in logger.handlers:

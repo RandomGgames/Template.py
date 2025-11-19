@@ -1,6 +1,7 @@
 example_key = "example_value"
 
 [logging]
+logs_file_path = "logs"
 console_logging_level = "DEBUG"
 file_logging_level = "DEBUG"
 logs_folder_path = "Logs"

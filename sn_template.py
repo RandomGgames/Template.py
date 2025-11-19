@@ -152,7 +152,7 @@ if __name__ == "__main__":
     error = 0
     try:
         start_time = time.perf_counter_ns()
-        logger.info(f'Script: {script_name} | Version: {__version__} | DUT SN: {dut_sn} | Host: {pc_name}')
+        logger.info(f'Script: "{script_name}" | Version: {__version__} | DUT SN: {dut_sn} | Host: "{pc_name}"')
         main(dut_sn)
         end_time = time.perf_counter_ns()
         duration = end_time - start_time

@@ -107,48 +107,51 @@ def setup_logging(
     logger.addHandler(console_handler)
 
 
+def load_config(file_path: typing.Union[str, pathlib.Path]) -> dict:
+    file_path = pathlib.Path(file_path)
+    if not file_path.exists():
+        raise FileNotFoundError(f'File not found: "{file_path}"')
+    config = read_toml(file_path)
+    return config
+
+
 if __name__ == "__main__":
-    config_path = pathlib.Path("config.toml")
-    if not config_path.exists():
-        raise FileNotFoundError(f'Missing {config_path}')
-    global config
-    config = read_toml(config_path)
-
-    console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.DEBUG)
-    file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.DEBUG)
-    logs_file_path = config.get("logging", {}).get("logs_file_path", "logs")
-    use_logs_folder = config.get("logging", {}).get("use_logs_folder", True)
-    number_of_logs_to_keep = config.get("logging", {}).get("number_of_logs_to_keep", 10)
-    log_message_format = config.get("logging", {}).get(
-        "log_message_format",
-        "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"
-    )
-
-    script_name = pathlib.Path(__file__).stem
-    pc_name = socket.gethostname()
-    if use_logs_folder:
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_dir = pathlib.Path(f'{logs_file_path}/{script_name}')
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file_name = f'{timestamp}_{script_name}_{pc_name}.log'
-        log_file_path = log_dir / log_file_name
-    else:
-        log_file_path = pathlib.Path(f'{script_name}_{pc_name}.log')
-
-    setup_logging(
-        logger,
-        log_file_path,
-        console_logging_level=console_logging_level,
-        file_logging_level=file_logging_level,
-        number_of_logs_to_keep=number_of_logs_to_keep,
-        log_message_format=log_message_format
-    )
-
     error = 0
     try:
+        config_path = pathlib.Path("config.toml")
+        config = load_config(config_path)
+
+        console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.DEBUG)
+        file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.DEBUG)
+        logs_file_path = config.get("logging", {}).get("logs_file_path", "logs")
+        use_logs_folder = config.get("logging", {}).get("use_logs_folder", True)
+        number_of_logs_to_keep = config.get("logging", {}).get("number_of_logs_to_keep", 10)
+        log_message_format = config.get("logging", {}).get(
+            "log_message_format",
+            "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"
+        )
+
+        script_name = pathlib.Path(__file__).stem
+        pc_name = socket.gethostname()
+        if use_logs_folder:
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            log_dir = pathlib.Path(f'{logs_file_path}/{script_name}')
+            log_dir.mkdir(parents=True, exist_ok=True)
+            log_file_name = f'{timestamp}_{script_name}_{pc_name}.log'
+            log_file_path = log_dir / log_file_name
+        else:
+            log_file_path = pathlib.Path(f'{script_name}_{pc_name}.log')
+
+        setup_logging(
+            logger,
+            log_file_path,
+            console_logging_level=console_logging_level,
+            file_logging_level=file_logging_level,
+            number_of_logs_to_keep=number_of_logs_to_keep,
+            log_message_format=log_message_format
+        )
         start_time = time.perf_counter_ns()
         logger.info(f'Script: "{script_name}" | Version: {__version__} | Host: "{pc_name}"')
-
         main()
         end_time = time.perf_counter_ns()
         duration = end_time - start_time
@@ -164,4 +167,5 @@ if __name__ == "__main__":
         for handler in logger.handlers:
             handler.close()
         logger.handlers.clear()
+        input("Press Enter to exit...")
         sys.exit(error)

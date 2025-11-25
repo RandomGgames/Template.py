@@ -17,6 +17,7 @@ Template includes:
 - Configurable logging via config file
 - Script run time at the end of execution
 - Error handling and cleanup
+- Total folder size log retention
 """
 
 __version__ = "1.0.0"  # Major.Minor.Patch
@@ -61,7 +62,6 @@ def format_duration_long(duration_seconds: float) -> str:
         value, ns = divmod(ns, factor)
         if value:
             parts.append(f'{value}{name}')
-        # Stop after two largest non-zero units
         if len(parts) == 2:
             break
     if not parts:
@@ -69,26 +69,47 @@ def format_duration_long(duration_seconds: float) -> str:
     return "".join(parts)
 
 
+def enforce_max_folder_size(log_dir: pathlib.Path, max_bytes: int) -> None:
+    """
+    Enforce a maximum total size for all logs in the folder.
+    Deletes oldest logs until below limit.
+    """
+    if max_bytes is None:
+        return
+
+    files = sorted(
+        [f for f in log_dir.glob("*.log*") if f.is_file()],
+        key=lambda f: f.stat().st_mtime
+    )
+
+    total_size = sum(f.stat().st_size for f in files)
+
+    while total_size > max_bytes and files:
+        oldest = files.pop(0)
+        try:
+            size = oldest.stat().st_size
+            oldest.unlink()
+            logger.debug(f'Deleted "{oldest}"')
+            total_size -= size
+        except Exception:
+            logger.error(f'Failed to delete "{oldest}"', exc_info=True)
+            continue
+
+
 def setup_logging(
         logger: logging.Logger,
         log_file_path: typing.Union[str, pathlib.Path],
-        number_of_logs_to_keep: typing.Union[int, None] = None,
+        max_folder_size_bytes: typing.Union[int, None] = None,
         console_logging_level: int = logging.DEBUG,
         file_logging_level: int = logging.DEBUG,
-        log_message_format: str = "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s] [%(name)s]: %(message)s",
-        date_format: str = "%Y-%m-%d %H:%M:%S") -> None:
+        log_message_format: str = "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s",
+        date_format: str = "%Y-%m-%d %H:%M:%S"
+) -> None:
+
     log_file_path = pathlib.Path(log_file_path)
     log_dir = log_file_path.parent
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    # Limit # of logs in logs folder
-    if number_of_logs_to_keep is not None:
-        log_files = sorted([f for f in log_dir.glob("*.log")], key=lambda f: f.stat().st_mtime)
-        if len(log_files) > number_of_logs_to_keep:
-            for file in log_files[:-number_of_logs_to_keep]:
-                file.unlink()
-
-    # Clear old handlers to avoid duplication
     logger.handlers.clear()
     logger.setLevel(file_logging_level)
 
@@ -106,6 +127,9 @@ def setup_logging(
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+    if max_folder_size_bytes is not None:
+        enforce_max_folder_size(log_dir, max_folder_size_bytes)
+
 
 def load_config(file_path: typing.Union[str, pathlib.Path]) -> dict:
     file_path = pathlib.Path(file_path)
@@ -118,36 +142,31 @@ def load_config(file_path: typing.Union[str, pathlib.Path]) -> dict:
 if __name__ == "__main__":
     error = 0
     try:
-        config_path = pathlib.Path("config.toml")
+        script_name = pathlib.Path(__file__).stem
+        config_path = pathlib.Path(f'{script_name}_config.toml')
+        # config_path = pathlib.Path("config.toml")
         config = load_config(config_path)
 
-        console_logging_level = getattr(logging, config.get("logging", {}).get("console_logging_level", "INFO").upper(), logging.DEBUG)
-        file_logging_level = getattr(logging, config.get("logging", {}).get("file_logging_level", "INFO").upper(), logging.DEBUG)
-        logs_file_path = config.get("logging", {}).get("logs_file_path", "logs")
-        use_logs_folder = config.get("logging", {}).get("use_logs_folder", True)
-        number_of_logs_to_keep = config.get("logging", {}).get("number_of_logs_to_keep", 10)
-        log_message_format = config.get("logging", {}).get(
-            "log_message_format",
-            "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s"
-        )
+        logging_config = config.get("logging", {})
+        console_logging_level = getattr(logging, logging_config.get("console_logging_level", "INFO").upper(), logging.DEBUG)
+        file_logging_level = getattr(logging, logging_config.get("file_logging_level", "INFO").upper(), logging.DEBUG)
+        log_message_format = logging_config.get("log_message_format", "%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s")
+        logs_folder_name = logging_config.get("logs_folder_name", "logs")
+        max_folder_size_bytes = logging_config.get("max_folder_size", None)
 
-        script_name = pathlib.Path(__file__).stem
         pc_name = socket.gethostname()
-        if use_logs_folder:
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            log_dir = pathlib.Path(f'{logs_file_path}/{script_name}')
-            log_dir.mkdir(parents=True, exist_ok=True)
-            log_file_name = f'{timestamp}_{script_name}_{pc_name}.log'
-            log_file_path = log_dir / log_file_name
-        else:
-            log_file_path = pathlib.Path(f'{script_name}_{pc_name}.log')
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        log_dir = pathlib.Path(logs_folder_name) / script_name
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file_name = f'{timestamp}_{script_name}_{pc_name}.log'
+        log_file_path = log_dir / log_file_name
 
         setup_logging(
             logger,
             log_file_path,
+            max_folder_size_bytes=max_folder_size_bytes,
             console_logging_level=console_logging_level,
             file_logging_level=file_logging_level,
-            number_of_logs_to_keep=number_of_logs_to_keep,
             log_message_format=log_message_format
         )
         start_time = time.perf_counter_ns()
